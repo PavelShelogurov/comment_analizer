@@ -2,17 +2,19 @@ import matplotlib.pyplot as plt
 import subprocess as sub
 import json
 import requests
+import yaml
 
 '''
     Скрипт ищет комментарии к видео. В итоге подсчитывает их количство 
 
     https://developers.google.com/youtube/v3/docs/comments дока по ютубу
 '''
+resource = yaml.load(open('resource.yaml', 'r'), yaml.BaseLoader)
 
-TEXT_FORMAT = 'html' #или plainText
-MAX_RESULTS = 100
-API_KEY = '' #Добавить сюда API_KEY для youtube API
-VIDEO_ID =  '' #Добавить адрес видео
+TEXT_FORMAT = resource.get('TEXT_FORMAT')
+MAX_RESULTS = resource.get('MAX_RESULTS_OF_REQUEST')
+API_KEY = resource.get('API_KEY')
+VIDEO_ID = resource.get('VIDEO_ID')
 PAGE_TOKEN = ''
 TOTAL_COMMENTS = 0
 
@@ -41,8 +43,8 @@ def checkReplyComment(jsonFile):
             except KeyError:
                 #следующей страницы с комментариями нет
                 isContunue = False
-    return total_comments            
-        
+    return total_comments
+
 
 hasNextPage = True
 
@@ -67,12 +69,12 @@ while (hasNextPage):
         author = jsonFile["items"][i]["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
         text = jsonFile["items"][i]["snippet"]["topLevelComment"]["snippet"]["textOriginal"]
         #file_comments.write(f'{author} : {text}')
-        TOTAL_COMMENTS += 1 
+        TOTAL_COMMENTS += 1
         number += 1
         print(f'{number}| {author} : {text}')
         TOTAL_COMMENTS += checkReplyComment(jsonFile["items"][i])
         #если коментарий имеет вложенные комментарии (ответы)
-        
+
 
 file_comments.close()
 print('Операция получения комментариев законцена')
